@@ -63,6 +63,7 @@
     (setf (symbol-value symbol) NIL)
     (expand-cas-tests (symbol-value symbol) NIL T)))
 
+#+(or allegro ccl lispworks sbcl)
 (define-test cas-special
   :parent cas
   (is eql *special* :root)
@@ -96,6 +97,7 @@
   (let ((vector (make-array 1 :initial-element 0 :element-type #+sbcl 'sb-ext:word)))
     (expand-atomic-incf-tests (aref vector 0) 0 1)))
 
+#+(or allegro ccl lispworks sbcl)
 (define-test atomic-incf-struct
   :parent atomic-incf
   (let ((instance (make-struct)))
