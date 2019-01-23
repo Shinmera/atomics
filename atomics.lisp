@@ -7,11 +7,13 @@
 (defpackage #:atomics
   (:nicknames #:org.shirakumo.atomics)
   (:use #:cl)
+  (:shadow #:defstruct)
   (:export
    #:cas
    #:atomic-incf
    #:atomic-decf
-   #:atomic-update))
+   #:atomic-update
+   #:defstruct))
 (in-package #:org.shirakumo.atomics)
 
 (define-condition implementation-not-supported (error)
@@ -58,7 +60,7 @@ the necessary operators, please file an issue at
   #+ecl
   `(+ (mp:atomic-incf ,place ,delta) ,delta)
   #+lispworks
-  `(system:atomic-fixnum-incf ,place ,delta)
+  `(system:atomic-incf ,place ,delta)
   #+sbcl
   `(+ (sb-ext:atomic-incf ,place ,delta) ,delta)
   #-(or allegro ecl ccl lispworks sbcl)
@@ -72,13 +74,18 @@ the necessary operators, please file an issue at
   #+ecl
   `(- (mp:atomic-decf ,place ,delta) ,delta)
   #+lispworks
-  `(system:atomic-fixnum-decf ,place ,delta)
+  `(system:atomic-decf ,place ,delta)
   #+sbcl
   `(- (sb-ext:atomic-decf ,place ,delta) ,delta)
   #-(or allegro ecl ccl lispworks sbcl)
   (no-support 'atomic-decf))
 
 (defmacro atomic-update (place update-fn)
+  #+allegro
+  (let ((value (gensym "VALUE")))
+    `(excl:update-atomic (,value ,place) (funcall ,update-fn ,value)))
+  #+ecl
+  `(mp:atomic-update ,place ,update-fn)
   #+sbcl
   `(sb-ext:atomic-update ,place ,update-fn)
   #-sbcl
@@ -87,3 +94,11 @@ the necessary operators, please file an issue at
     `(loop for ,old = ,place
            for ,new = (funcall ,update-fn ,old)
            until (cas ,place ,old ,new))))
+
+(defmacro defstruct (name &rest slots)
+  #+ecl
+  `(cl:defstruct (,@(if (listp name) name (list name))
+                  :atomic-accessors)
+     ,@slots)
+  #-ecl
+  `(cl:defstruct ,name ,@slots))
