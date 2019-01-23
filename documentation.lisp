@@ -44,7 +44,7 @@ SLOT-VALUE      X*        X*    X*      X*
 MEMREF          X                          
 MEMREF-INT      X                          
 struct-slot     X     X*  X*    X       X* 
-special-var     X     X         X          
+special-var     X     X         X       X  
 custom                    X     X       X  
 
 Further restrictions apply:
