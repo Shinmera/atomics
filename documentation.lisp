@@ -92,7 +92,6 @@ FIRST                     X             X
 REST                      X             X  
 SVREF           X     X   X     X          
 AREF                                    X
-SYMBOL-PLIST    X                          
 SYMBOL-VALUE    X         X     X          
 SLOT-VALUE      X*        X*    X*         
 MEMREF          X                          
