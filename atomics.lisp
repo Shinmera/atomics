@@ -9,6 +9,8 @@
   (:use #:cl)
   (:shadow #:defstruct)
   (:export
+   #:implementation-not-supported
+   #:operation
    #:cas
    #:atomic-incf
    #:atomic-decf

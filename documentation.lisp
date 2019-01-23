@@ -7,6 +7,20 @@
 (in-package #:org.shirakumo.atomics)
 
 (docs:define-docs
+  (type implementation-not-supported
+    "Error signalled on unsupported implementations.
+
+This error may be signalled when the library is loaded and the current
+implementation is entirely unsupported, or if the current operation is
+not supported by the implementation.
+
+See OPERATION")
+
+  (function operation
+    "Returns the unsupported operation or NIL on entirely unsupported implementations.
+
+See IMPLEMENTATION-NOT-SUPPORTED")
+  
   (function cas
     "Perform a Compare-And-Swap.
 
