@@ -1,0 +1,89 @@
+#|
+ This file is a part of Atomics
+ (c) 2019 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
+|#
+
+(defpackage #:atomics
+  (:nicknames #:org.shirakumo.atomics)
+  (:use #:cl)
+  (:export
+   #:cas
+   #:atomic-incf
+   #:atomic-decf
+   #:atomic-update))
+(in-package #:org.shirakumo.atomics)
+
+(define-condition implementation-not-supported (error)
+  ((operation :initarg :operation :initform NIL :reader operation))
+  (:report (lambda (c s) (format s "~
+~:[~a is not supported by the Atomics library.~;
+~:*The ~a operation is not supported by ~a in Atomics.~]
+This is most likely due to lack of support by the implementation.
+
+If you think this is in error, and the implementation does expose
+the necessary operators, please file an issue at
+
+  https://github.com/shinmera/atomics/issues"
+                                 (operation c)
+                                 (lisp-implementation-type)))))
+
+(defun no-support (&optional operation)
+  (error 'implementation-not-supported :operation operation))
+
+#-(or allegro ecl ccl lispworks sbcl)
+(no-support)
+
+(defmacro cas (place old new)
+  #+allegro
+  `(excl:atomic-conditional-setf ,place ,new ,old)
+  #+ccl
+  `(ccl::conditional-store ,place ,old ,new)
+  #+ecl
+  (let ((tmp (gensym "OLD")))
+    `(let ((,tmp ,old)) (eq ,tmp (mp:compare-and-swap ,place ,tmp ,new))))
+  #+lispworks
+  `(system:compare-and-swap ,place ,old ,new)
+  #+sbcl
+  (let ((tmp (gensym "OLD")))
+    `(let ((,tmp ,old)) (eq ,tmp (sb-ext:cas ,place ,tmp ,new))))
+  #-(or allegro ecl ccl lispworks sbcl)
+  (no-support 'CAS))
+
+(defmacro atomic-incf (place &optional (delta 1))
+  #+allegro
+  `(excl:incf-atomic ,place ,delta)
+  #+ccl
+  `(ccl::atomic-incf-decf ,place ,delta)
+  #+ecl
+  `(+ (mp:atomic-incf ,place ,delta) ,delta)
+  #+lispworks
+  `(system:atomic-fixnum-incf ,place ,delta)
+  #+sbcl
+  `(+ (sb-ext:atomic-incf ,place ,delta) ,delta)
+  #-(or allegro ecl ccl lispworks sbcl)
+  (no-support 'atomic-incf))
+
+(defmacro atomic-decf (place &optional (delta 1))
+  #+allegro
+  `(excl:decf-atomic ,place ,delta)
+  #+ccl
+  `(ccl::atomic-incf-decf ,place (- ,delta))
+  #+ecl
+  `(- (mp:atomic-decf ,place ,delta) ,delta)
+  #+lispworks
+  `(system:atomic-fixnum-decf ,place ,delta)
+  #+sbcl
+  `(- (sb-ext:atomic-decf ,place ,delta) ,delta)
+  #-(or allegro ecl ccl lispworks sbcl)
+  (no-support 'atomic-decf))
+
+(defmacro atomic-update (place update-fn)
+  #+sbcl
+  `(sb-ext:atomic-update ,place ,update-fn)
+  #-sbcl
+  (let ((old (gensym "OLD"))
+        (new (gensym "NEW")))
+    `(loop for ,old = ,place
+           for ,new = (funcall ,update-fn ,old)
+           until (cas ,place ,old ,new))))

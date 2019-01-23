@@ -1,0 +1,13 @@
+## About Atomics
+This is a library for access to atomic operation primitives such as compare-and-swap. It aims to be a rather thin layer over what the implementations offer.
+
+## Currently Supported Implementations
+The following implementations are fully or partially supported:
+
+- Allegro
+- CCL
+- ECL
+- LispWorks
+- SBCL
+
+For a detailed report on the capabilities, please see the documentation of the respective operators. If you think that an implementation should be added, or better supported, please file an "issue"(https://github.com/shinmera/atomics/issues) or a pull request with the necessary information.
