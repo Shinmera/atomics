@@ -6,7 +6,7 @@
 
 (asdf:defsystem atomics
   :version "1.0.0"
-  :license "Artistic"
+  :license "zlib"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
   :description "Portability layer for atomic operations like compare-and-swap (CAS)."
