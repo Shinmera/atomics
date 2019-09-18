@@ -90,7 +90,7 @@ the necessary operators, please file an issue at
   `(mp:atomic-update ,place ,update-fn)
   #+sbcl
   `(sb-ext:atomic-update ,place ,update-fn)
-  #-sbcl
+  #-(or allegro ecl sbcl)
   (let ((old (gensym "OLD"))
         (new (gensym "NEW")))
     `(loop for ,old = ,place
