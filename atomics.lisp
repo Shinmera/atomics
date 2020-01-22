@@ -40,7 +40,7 @@ the necessary operators, please file an issue at
 
 (defmacro cas (place old new)
   #+allegro
-  `(excl:atomic-conditional-setf ,place ,new ,old)
+  `(if (excl:atomic-conditional-setf ,place ,new ,old) T NIL)
   #+ccl
   `(ccl::conditional-store ,place ,old ,new)
   #+ecl
