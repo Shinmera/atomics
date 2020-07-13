@@ -35,7 +35,7 @@ the necessary operators, please file an issue at
 (defun no-support (&optional operation)
   (error 'implementation-not-supported :operation operation))
 
-#-(or allegro ecl ccl lispworks sbcl)
+#-(or allegro ccl clasp ecl lispworks sbcl)
 (no-support)
 
 (defmacro cas (place old new)
@@ -43,6 +43,9 @@ the necessary operators, please file an issue at
   `(if (excl:atomic-conditional-setf ,place ,new ,old) T NIL)
   #+ccl
   `(ccl::conditional-store ,place ,old ,new)
+  #+clasp
+  (let ((tmp (gensym "OLD")))
+    `(let ((,tmp ,old)) (eq ,tmp (mp:cas ,place ,tmp ,new))))
   #+ecl
   (let ((tmp (gensym "OLD")))
     `(let ((,tmp ,old)) (eq ,tmp (mp:compare-and-swap ,place ,tmp ,new))))
@@ -51,7 +54,7 @@ the necessary operators, please file an issue at
   #+sbcl
   (let ((tmp (gensym "OLD")))
     `(let ((,tmp ,old)) (eq ,tmp (sb-ext:cas ,place ,tmp ,new))))
-  #-(or allegro ecl ccl lispworks sbcl)
+  #-(or allegro ccl clasp ecl lispworks sbcl)
   (no-support 'CAS))
 
 (defmacro atomic-incf (place &optional (delta 1))
@@ -59,13 +62,15 @@ the necessary operators, please file an issue at
   `(excl:incf-atomic ,place ,delta)
   #+ccl
   `(ccl::atomic-incf-decf ,place ,delta)
+  #+clasp
+  `(mp:atomic-incf ,place ,delta)
   #+ecl
   `(+ (mp:atomic-incf ,place ,delta) ,delta)
   #+lispworks
   `(system:atomic-incf ,place ,delta)
   #+sbcl
   `(+ (sb-ext:atomic-incf ,place ,delta) ,delta)
-  #-(or allegro ecl ccl lispworks sbcl)
+  #-(or allegro ccl clasp ecl lispworks sbcl)
   (no-support 'atomic-incf))
 
 (defmacro atomic-decf (place &optional (delta 1))
@@ -73,24 +78,28 @@ the necessary operators, please file an issue at
   `(excl:decf-atomic ,place ,delta)
   #+ccl
   `(ccl::atomic-incf-decf ,place (- ,delta))
+  #+clasp
+  `(mp:atomic-decf ,place ,delta)
   #+ecl
   `(- (mp:atomic-decf ,place ,delta) ,delta)
   #+lispworks
   `(system:atomic-decf ,place ,delta)
   #+sbcl
   `(- (sb-ext:atomic-decf ,place ,delta) ,delta)
-  #-(or allegro ecl ccl lispworks sbcl)
+  #-(or allegro ccl clasp ecl lispworks sbcl)
   (no-support 'atomic-decf))
 
 (defmacro atomic-update (place update-fn)
   #+allegro
   (let ((value (gensym "VALUE")))
     `(excl:update-atomic (,value ,place) (funcall ,update-fn ,value)))
+  #+clasp
+  `(mp:atomic-update ,place ,update-fn)
   #+ecl
   `(mp:atomic-update ,place ,update-fn)
   #+sbcl
   `(sb-ext:atomic-update ,place ,update-fn)
-  #-(or allegro ecl sbcl)
+  #-(or allegro clasp ecl sbcl)
   (let ((old (gensym "OLD"))
         (new (gensym "NEW")))
     `(loop for ,old = ,place
