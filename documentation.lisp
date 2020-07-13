@@ -43,7 +43,7 @@ SYMBOL-VALUE    X          X    X     X       X
 SLOT-VALUE      X*         X    X*    X*      X* 
 MEMREF          X                          
 MEMREF-INT      X                          
-struct-slot     X     X*        X*    X       X* 
+struct-slot     X     X*   X    X*    X       X* 
 special-var     X     X    X          X       X  
 custom                     X    X     X       X  
 
@@ -105,7 +105,7 @@ SYMBOL-VALUE    X          X    X     X
 SLOT-VALUE      X*         X    X*    X*         
 MEMREF          X                          
 MEMREF-INT      X                          
-struct-slot     X     X*        X*    X       X* 
+struct-slot     X     X*   X    X*    X       X* 
 special-var     X     X    X          X          
 custom                     X    X     X       X  
 global (SBCL)                                 X* 
