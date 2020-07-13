@@ -32,20 +32,20 @@ not EQ to OLD.
 
 Restrictions apply to allowed PLACEs by implementation:
 
-             Allegro CCL ECL LispWorks SBCL
-CAR             X         X     X       X  
-CDR             X         X     X       X  
-FIRST                     X             X  
-REST                      X             X  
-SVREF           X     X   X     X       X  
-SYMBOL-PLIST    X         X             X  
-SYMBOL-VALUE    X         X     X       X  
-SLOT-VALUE      X*        X*    X*      X* 
+             Allegro CCL Clasp ECL LispWorks SBCL
+CAR             X          X    X     X       X  
+CDR             X          X    X     X       X  
+FIRST                      X    X             X  
+REST                       X    X             X  
+SVREF           X     X    X    X     X       X  
+SYMBOL-PLIST    X          X    X             X  
+SYMBOL-VALUE    X          X    X     X       X  
+SLOT-VALUE      X*         X    X*    X*      X* 
 MEMREF          X                          
 MEMREF-INT      X                          
-struct-slot     X     X*  X*    X       X* 
-special-var     X     X         X       X  
-custom                    X     X       X  
+struct-slot     X     X*        X*    X       X* 
+special-var     X     X    X          X       X  
+custom                     X    X     X       X  
 
 Further restrictions apply:
 
@@ -59,6 +59,15 @@ Further restrictions apply:
 # CCL                                         (CCL::CONDITIONAL-STORE)
 - struct-slot accesses only seem to work quite right for T-typed
   slots.
+
+# Clasp                                                       (MP:CAS)
+- SLOT-VALUE can only be used for :INSTANCE and :CLASS allocated
+  slots. Methods on SLOT-VALUE-USING-CLASS etc. are ignored. If the
+  slot is missing, SLOT-MISSING is called with operation = MP:CAS,
+  and new-value = a list of OLD and NEW. The slot must be bound.
+- SYMBOL-VALUE (and a special variable directly) accesses the
+  dynamically bound value if it is dynamically bound, rather than the
+  global value.
 
 # ECL                                            (MP:COMPARE-AND-SWAP)
 - If a slot is unbound, an error is signalled unless the OLD value is
@@ -85,25 +94,28 @@ Returns the value the place has been set to.
 
 Restrictions apply to allowed PLACEs by implementation:
 
-             Allegro CCL ECL LispWorks SBCL
-CAR             X     X   X     X       X  
-CDR             X     X   X     X       X  
-FIRST                     X             X  
-REST                      X             X  
-SVREF           X     X   X     X          
-AREF                                    X
-SYMBOL-VALUE    X         X     X          
-SLOT-VALUE      X*        X*    X*         
+             Allegro CCL Clasp ECL LispWorks SBCL
+CAR             X     X    X    X     X       X  
+CDR             X     X    X    X     X       X  
+FIRST                      X    X             X  
+REST                       X    X             X  
+SVREF           X     X    X    X     X          
+AREF                                          X
+SYMBOL-VALUE    X          X    X     X          
+SLOT-VALUE      X*         X    X*    X*         
 MEMREF          X                          
 MEMREF-INT      X                          
-struct-slot     X     X*  X*    X       X* 
-special-var     X     X         X          
-custom                    X     X       X  
-global (SBCL)                           X* 
+struct-slot     X     X*        X*    X       X* 
+special-var     X     X    X          X          
+custom                     X    X     X       X  
+global (SBCL)                                 X* 
 
 Further restrictions apply:
 
 # Allegro                                           (EXCL:ATOMIC-INCF)
+See CAS
+
+# Clasp                                               (MP:ATOMIC-INCF)
 See CAS
 
 # CCL                                           (CCL:ATOMIC-INCF-DECF)
