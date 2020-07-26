@@ -90,14 +90,14 @@
 
 (define-test atomic-incf-vector
   :parent atomic-incf
-  #+(or allegro ccl ecl lispworks)
+  #+(or allegro ccl ecl mezzano lispworks)
   (let ((vector (make-array 1 :initial-element 0)))
     (expand-atomic-incf-tests (svref vector 0) 0 1))
-  #+sbcl
-  (let ((vector (make-array 1 :initial-element 0 :element-type #+sbcl 'sb-ext:word)))
+  #+(or mezzano sbcl)
+  (let ((vector (make-array 1 :initial-element 0 :element-type #-sbcl 'fixnum #+sbcl 'sb-ext:word)))
     (expand-atomic-incf-tests (aref vector 0) 0 1)))
 
-#+(or allegro ccl lispworks sbcl)
+#+(or allegro ccl lispworks mezzano sbcl)
 (define-test atomic-incf-struct
   :parent atomic-incf
   (let ((instance (make-struct)))
