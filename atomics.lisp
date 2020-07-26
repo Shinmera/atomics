@@ -35,7 +35,7 @@ the necessary operators, please file an issue at
 (defun no-support (&optional operation)
   (error 'implementation-not-supported :operation operation))
 
-#-(or allegro ccl clasp ecl lispworks sbcl)
+#-(or allegro ccl clasp ecl lispworks mezzano sbcl)
 (no-support)
 
 (defmacro cas (place old new)
@@ -51,10 +51,14 @@ the necessary operators, please file an issue at
     `(let ((,tmp ,old)) (eq ,tmp (mp:compare-and-swap ,place ,tmp ,new))))
   #+lispworks
   `(system:compare-and-swap ,place ,old ,new)
+  #+mezzano
+  (let ((tmp (gensym "OLD")))
+    `(let ((,tmp ,old))
+       (eq ,tmp (mezzano.extensions:compare-and-swap ,place ,tmp ,new))))
   #+sbcl
   (let ((tmp (gensym "OLD")))
     `(let ((,tmp ,old)) (eq ,tmp (sb-ext:cas ,place ,tmp ,new))))
-  #-(or allegro ccl clasp ecl lispworks sbcl)
+  #-(or allegro ccl clasp ecl lispworks mezzano sbcl)
   (no-support 'CAS))
 
 (defmacro atomic-incf (place &optional (delta 1))
@@ -68,9 +72,11 @@ the necessary operators, please file an issue at
   `(+ (mp:atomic-incf ,place ,delta) ,delta)
   #+lispworks
   `(system:atomic-incf ,place ,delta)
+  #+mezzano
+  `(+ (mezzano.extensions:atomic-incf ,place ,delta) ,delta)
   #+sbcl
   `(+ (sb-ext:atomic-incf ,place ,delta) ,delta)
-  #-(or allegro ccl clasp ecl lispworks sbcl)
+  #-(or allegro ccl clasp ecl lispworks mezzano sbcl)
   (no-support 'atomic-incf))
 
 (defmacro atomic-decf (place &optional (delta 1))
@@ -84,9 +90,11 @@ the necessary operators, please file an issue at
   `(- (mp:atomic-decf ,place ,delta) ,delta)
   #+lispworks
   `(system:atomic-decf ,place ,delta)
+  #+mezzano
+  `(- (mezzano.extensions:atomic-decf ,place ,delta) ,delta)
   #+sbcl
   `(- (sb-ext:atomic-decf ,place ,delta) ,delta)
-  #-(or allegro ccl clasp ecl lispworks sbcl)
+  #-(or allegro ccl clasp ecl lispworks mezzano sbcl)
   (no-support 'atomic-decf))
 
 (defmacro atomic-update (place update-fn)

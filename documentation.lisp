@@ -32,20 +32,20 @@ not EQ to OLD.
 
 Restrictions apply to allowed PLACEs by implementation:
 
-             Allegro CCL Clasp ECL LispWorks SBCL
-CAR             X          X    X     X       X  
-CDR             X          X    X     X       X  
-FIRST                      X    X             X  
-REST                       X    X             X  
-SVREF           X     X    X    X     X       X  
-SYMBOL-PLIST    X          X    X             X  
-SYMBOL-VALUE    X          X    X     X       X  
-SLOT-VALUE      X*         X    X*    X*      X* 
+             Allegro CCL Clasp ECL LispWorks Mezzano SBCL
+CAR             X          X    X     X         X     X  
+CDR             X          X    X     X         X     X  
+FIRST                      X    X               X     X  
+REST                       X    X               X     X  
+SVREF           X     X    X    X     X         X     X  
+SYMBOL-PLIST    X          X    X                     X  
+SYMBOL-VALUE    X          X    X     X         X     X  
+SLOT-VALUE      X*         X    X*    X*        X     X* 
 MEMREF          X                          
 MEMREF-INT      X                          
-struct-slot     X     X*   X    X*    X       X* 
-special-var     X     X    X          X       X  
-custom                     X    X     X       X  
+struct-slot     X     X*   X    X*    X         X     X* 
+special-var     X     X    X          X         X     X  
+custom                     X    X     X         X     X  
 
 Further restrictions apply:
 
@@ -80,6 +80,15 @@ Further restrictions apply:
 - SLOT-VALUE can only be used for :INSTANCE and :CLASS allocated slots
   and will not work with SLOT-VALUE-USING-CLASS.
 
+# Mezzano                        (MEZZANO.EXTENSIONS:COMPARE-AND-SWAP)
+- If a slot has methods defined on SLOT-VALUE-USING-CLASS or
+  SLOT-BOUNDP-USING-CLASS, then it must also have a method defined
+  on (MEZZANO.EXTENSIONS:CAS SLOT-VALUE-USING-CLASS) for CAS of
+  SLOT-VALUE to work. If the slot is missing, SLOT-MISSING is called
+  with operation = MEZZANO.EXTENSIONS:CAS, and new-value = a list of
+  OLD and NEW. If a slot is unbound, an error is signalled unless
+  the OLD value is MEZZANO.CLOS:+SLOT-UNBOUND+.
+
 # SBCL                                                    (SB-EXT:CAS)
 - If a slot is unbound, an error is signalled unless the OLD value is
   SB-PCL:+SLOT-UNBOUND+. If the slot has methods defined on
@@ -94,21 +103,21 @@ Returns the value the place has been set to.
 
 Restrictions apply to allowed PLACEs by implementation:
 
-             Allegro CCL Clasp ECL LispWorks SBCL
-CAR             X     X    X    X     X       X  
-CDR             X     X    X    X     X       X  
-FIRST                      X    X             X  
-REST                       X    X             X  
-SVREF           X     X    X    X     X          
-AREF                                          X
-SYMBOL-VALUE    X          X    X     X          
-SLOT-VALUE      X*         X    X*    X*         
+             Allegro CCL Clasp ECL LispWorks Mezzano SBCL
+CAR             X     X    X    X     X         X     X  
+CDR             X     X    X    X     X         X     X  
+FIRST                      X    X               X     X  
+REST                       X    X               X     X  
+SVREF           X     X    X    X     X         X        
+AREF                                            X     X
+SYMBOL-VALUE    X          X    X     X         X        
+SLOT-VALUE      X*         X    X*    X*        X        
 MEMREF          X                          
 MEMREF-INT      X                          
-struct-slot     X     X*   X    X*    X       X* 
-special-var     X     X    X          X          
-custom                     X    X     X       X  
-global (SBCL)                                 X* 
+struct-slot     X     X*   X    X*    X         X     X* 
+special-var     X     X    X          X         X        
+custom                     X    X     X         X     X  
+global (SBCL)                                         X* 
 
 Further restrictions apply:
 
@@ -129,6 +138,12 @@ See CAS
 
 # LispWorks                                       (SYSTEM:ATOMIC-INCF)
 See CAS
+
+# Mezzano                             (MEZZANO.EXTENSIONS:ATOMIC-INCF)
+See CAS
+- The places must store a FIXNUM.
+- The addition is performed with modular arithmetic, meaning over- or
+  underflows will wrap around.
 
 # SBCL                                            (SB-EXT:ATOMIC-INCF)
 - struct-slots must be of type SB-EXT:WORD.
