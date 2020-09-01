@@ -14,6 +14,8 @@
    #:cas
    #:atomic-incf
    #:atomic-decf
+   #:atomic-pop
+   #:atomic-push
    #:atomic-update
    #:defstruct))
 (in-package #:org.shirakumo.atomics)
@@ -96,6 +98,41 @@ the necessary operators, please file an issue at
   `(- (sb-ext:atomic-decf ,place ,delta) ,delta)
   #-(or allegro ccl clasp ecl lispworks mezzano sbcl)
   (no-support 'atomic-decf))
+
+(defmacro atomic-pop (place)
+  #+allegro
+  `(excl:pop-atomic ,place)
+  #+ecl
+  `(mp:atomic-pop ,place)
+  #+lispworks
+  `(system:atomic-pop ,place)
+  #+sbcl
+  `(sb-ext:atomic-pop ,place)
+  #-(or allegro ecl lispworks sbcl)
+  (let ((new (gensym))
+        (old (gensym)))
+    `(let* ((,old ,place))
+       (loop for ,new = (cdr ,old)
+             until (cas ,place ,old ,new)
+             finally (return (car ,old))))))
+
+(defmacro atomic-push (value place)
+  #+allegro
+  `(excl:push-atomic ,value ,place)
+  #+ecl
+  `(mp:atomic-push ,value ,place)
+  #+lispworks
+  `(system:atomic-push ,value ,place)
+  #+sbcl
+  `(sb-ext:atomic-push ,value ,place)
+  #-(or allegro ecl lispworks sbcl)
+  (let ((new (gensym))
+        (old (gensym)))
+    `(let* ((,old ,place)
+            (,new (cons ,value ,old)))
+       (loop until (cas ,place ,old ,new)
+             do (setf (cdr ,new) ,old)
+             finally (return ,new)))))
 
 (defmacro atomic-update (place update-fn)
   #+allegro

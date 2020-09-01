@@ -102,3 +102,23 @@
   :parent atomic-incf
   (let ((instance (make-struct)))
     (expand-atomic-incf-tests (struct-fixnum instance) 0 1)))
+
+(defmacro expand-atomic-pop-and-push-tests (place)
+  `(progn
+     (is equal nil (atomics:atomic-pop ,place))
+     (is equal (list 1) (atomics:atomic-push 1 ,place))
+     (is = 1 (atomics:atomic-pop ,place))
+     (is equal nil ,place)
+     (is equal (list 2) (atomics:atomic-push 2 ,place))
+     (is equal (list 3 2) (atomics:atomic-push 3 ,place))
+     (is = 3 (atomics:atomic-pop ,place))
+     (is = 2 (atomics:atomic-pop ,place))
+     (is equal nil ,place)))
+
+(define-test atomic-pop-and-push
+  :parent atomics
+  (let ((cons (cons NIL NIL)))
+    (expand-atomic-pop-and-push-tests (car cons))
+    (expand-atomic-pop-and-push-tests (cdr cons))
+    (expand-atomic-pop-and-push-tests (first cons))
+    (expand-atomic-pop-and-push-tests (rest cons))))
