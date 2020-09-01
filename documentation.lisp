@@ -163,6 +163,27 @@ For restrictions, see ATOMIC-INCF.
 
 See ATOMIC-INCF")
 
+  (function atomic-pop
+    "Atomically pops place, much like CL:POP.
+
+Returns the value which has been popped from place.
+
+For restrictions, see ATOMIC-PUSH.
+
+See ATOMIC-PUSH")
+
+  (function atomic-push
+    "Atomically pushes value into place, much like CL:PUSH.
+
+Returns the value the place has been set to.
+
+In Allegro, ECL, LispWorks, and SBCL, their native implementation of atomic pop and push are used.
+On implementations that do not provide such operations, a fallback based on ATOMIC-CAS is available for usage.
+
+Restrictions apply to allowed PLACEs by implementation, see CAS.
+
+See CAS")
+
   (function atomic-update
     "Updates the PLACE with the value retrieved from UPDATE-FN
 
@@ -170,7 +191,7 @@ The UPDATE-FN is called with the old value of the PLACE and should
 return the new value to set the place to.
 The PLACE and UPDATE-FN may be evaluated multiple times.
 
-For restrictions that apply to the PLACE, see CAS.
+Restrictions apply to the PLACE, see CAS.
 
 See CAS")
   
