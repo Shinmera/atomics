@@ -47,6 +47,18 @@ struct-slot     X     X*   X    X*    X         X     X*
 special-var     X     X    X    X     X         X     X  
 custom                     X    X     X         X     X  
 
+For each of the above feature flags are pushed when available:
+
+  :ATOMICS-CAS-CAR
+  :ATOMICS-CAS-SVREF
+  :ATOMICS-CAS-SYMBOL-PLIST
+  :ATOMICS-CAS-SYMBOL-VALUE
+  :ATOMICS-CAS-SLOT-VALUE
+  :ATOMICS-CAS-MEMREF
+  :ATOMICS-CAS-STRUCT-SLOT
+  :ATOMICS-CAS-SPECIAL-VAR
+  :ATOMICS-CAS-CUSTOM
+
 Further restrictions apply:
 
 # Allegro                               (EXCL:ATOMIC-CONDITIONAL-SETF)
