@@ -20,23 +20,23 @@
    #:defstruct))
 (in-package #:org.shirakumo.atomics)
 
-#+(or allegro ccl clasp ecl lispworks mezzano sbcl)
+#+(or allegro ccl clasp ecl lispworks mezzano sbcl cmucl)
 (pushnew :atomics-cas-car *features*)
-#+(or allegro ccl clasp ecl lispworks mezzano sbcl)
+#+(or allegro ccl clasp ecl lispworks mezzano sbcl cmucl)
 (pushnew :atomics-cas-svref *features*)
-#+(or allegro clasp ecl sbcl)
+#+(or allegro clasp ecl sbcl cmucl)
 (pushnew :atomics-cas-symbol-plist *features*)
-#+(or allegro clasp ecl lispworks mezzano sbcl)
+#+(or allegro clasp ecl lispworks mezzano sbcl cmucl)
 (pushnew :atomics-cas-symbol-value *features*)
-#+(or allegro clasp ecl lispworks mezzano sbcl)
+#+(or allegro clasp ecl lispworks mezzano sbcl cmucl)
 (pushnew :atomics-cas-slot-value *features*)
 #+(or allegro)
 (pushnew :atomics-cas-memref *features*)
-#+(or allegro ccl clasp ecl lispworks mezzano sbcl)
+#+(or allegro ccl clasp ecl lispworks mezzano sbcl cmucl)
 (pushnew :atomics-cas-struct-slot *features*)
-#+(or allegro ccl clasp ecl lispworks mezzano sbcl)
+#+(or allegro ccl clasp ecl lispworks mezzano sbcl cmucl)
 (pushnew :atomics-cas-special-var *features*)
-#+(or clasp ecl lispworks mezzano sbcl)
+#+(or clasp ecl lispworks mezzano sbcl cmucl)
 (pushnew :atomics-cas-custom *features*)
 
 (define-condition implementation-not-supported (error)
@@ -56,7 +56,7 @@ the necessary operators, please file an issue at
 (defun no-support (&optional operation)
   (error 'implementation-not-supported :operation operation))
 
-#-(or allegro ccl clasp ecl lispworks mezzano sbcl)
+#-(or allegro ccl clasp ecl lispworks mezzano sbcl (and cmucl x86))
 (no-support)
 
 (defmacro cas (place old new)
@@ -79,7 +79,16 @@ the necessary operators, please file an issue at
   #+sbcl
   (let ((tmp (gensym "OLD")))
     `(let ((,tmp ,old)) (eq ,tmp (sb-ext:cas ,place ,tmp ,new))))
-  #-(or allegro ccl clasp ecl lispworks mezzano sbcl)
+  #+cmucl
+  ;; CMUCL doesn't implement CAS, but it can be implemented
+  ;; with mp:without-scheduling macro which is used by implementation
+  ;; of other atomic operations.
+  `(mp:without-scheduling ()
+     (when (eq ,old ,place)
+       (progn
+         (setf ,place ,new)
+         T)))
+  #-(or allegro ccl clasp ecl lispworks mezzano sbcl cmucl)
   (no-support 'CAS))
 
 (defmacro atomic-incf (place &optional (delta 1))
@@ -97,7 +106,9 @@ the necessary operators, please file an issue at
   `(+ (mezzano.extensions:atomic-incf ,place ,delta) ,delta)
   #+sbcl
   `(+ (sb-ext:atomic-incf ,place ,delta) ,delta)
-  #-(or allegro ccl clasp ecl lispworks mezzano sbcl)
+  #+cmucl
+  `(mp:atomic-incf ,place ,delta)
+  #-(or allegro ccl clasp ecl lispworks mezzano sbcl cmucl)
   (no-support 'atomic-incf))
 
 (defmacro atomic-decf (place &optional (delta 1))
@@ -115,7 +126,9 @@ the necessary operators, please file an issue at
   `(- (mezzano.extensions:atomic-decf ,place ,delta) ,delta)
   #+sbcl
   `(- (sb-ext:atomic-decf ,place ,delta) ,delta)
-  #-(or allegro ccl clasp ecl lispworks mezzano sbcl)
+  #+cmucl
+  `(mp:atomic-decf ,place ,delta)
+  #-(or allegro ccl clasp ecl lispworks mezzano sbcl cmucl)
   (no-support 'atomic-decf))
 
 (defmacro atomic-pop (place)
@@ -127,7 +140,9 @@ the necessary operators, please file an issue at
   `(system:atomic-pop ,place)
   #+sbcl
   `(sb-ext:atomic-pop ,place)
-  #-(or allegro ecl lispworks sbcl)
+  #+cmucl
+  `(mp:atomic-pop ,place)
+  #-(or allegro ecl lispworks sbcl cmucl)
   (let ((new (gensym))
         (old (gensym)))
     `(let* ((,old ,place))
@@ -144,7 +159,9 @@ the necessary operators, please file an issue at
   `(system:atomic-push ,value ,place)
   #+sbcl
   `(sb-ext:atomic-push ,value ,place)
-  #-(or allegro ecl lispworks sbcl)
+  #+cmucl
+  `(mp:atomic-push ,value ,place)
+  #-(or allegro ecl lispworks sbcl cmucl)
   (let ((new (gensym))
         (old (gensym)))
     `(let* ((,old ,place)

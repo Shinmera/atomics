@@ -32,20 +32,20 @@ not EQ to OLD.
 
 Restrictions apply to allowed PLACEs by implementation:
 
-             Allegro CCL Clasp ECL LispWorks Mezzano SBCL
-CAR             X          X    X     X         X     X  
-CDR             X          X    X     X         X     X  
-FIRST                      X    X               X     X  
-REST                       X    X               X     X  
-SVREF           X     X    X    X     X         X     X  
-SYMBOL-PLIST    X          X    X                     X  
-SYMBOL-VALUE    X          X    X     X         X     X  
-SLOT-VALUE      X*         X    X*    X*        X     X* 
-MEMREF          X                          
-MEMREF-INT      X                          
-struct-slot     X     X*   X    X*    X         X     X* 
-special-var     X     X    X    X     X         X     X  
-custom                     X    X     X         X     X  
+             Allegro CCL Clasp ECL LispWorks Mezzano SBCL CMUCL
+CAR             X          X    X     X         X     X     X  
+CDR             X          X    X     X         X     X     X  
+FIRST                      X    X               X     X     X  
+REST                       X    X               X     X     X  
+SVREF           X     X    X    X     X         X     X     X  
+SYMBOL-PLIST    X          X    X                     X     X  
+SYMBOL-VALUE    X          X    X     X         X     X     X  
+SLOT-VALUE      X*         X    X*    X*        X     X*    X  
+MEMREF          X                                              
+MEMREF-INT      X                                              
+struct-slot     X     X*   X    X*    X         X     X*    X  
+special-var     X     X    X    X     X         X     X     X  
+custom                     X    X     X         X     X     X  
 
 For each of the above feature flags are pushed when available:
 
@@ -106,7 +106,11 @@ Further restrictions apply:
   SB-PCL:+SLOT-UNBOUND+. If the slot has methods defined on
   SLOT-VALUE-USING-CLASS or SLOT-BOUNDP-USING-CLASS, the consequences
   are undefined.
-- struct-slot types must be either FIXNUM or T.")
+- struct-slot types must be either FIXNUM or T.
+
+# CMUCL                               (based on MP:WITHOUT-SCHEDULING)
+- On CMUCL green threads are implemented on X86 ports only
+- Due to nature of threads atomic operations are blocking.")
   
   (function atomic-incf
     "Atomically increases place by the specified delta.
@@ -115,21 +119,21 @@ Returns the value the place has been set to.
 
 Restrictions apply to allowed PLACEs by implementation:
 
-             Allegro CCL Clasp ECL LispWorks Mezzano SBCL
-CAR             X     X    X    X     X         X     X  
-CDR             X     X    X    X     X         X     X  
-FIRST                      X    X               X     X  
-REST                       X    X               X     X  
-SVREF           X     X    X    X     X         X        
-AREF                                            X     X
-SYMBOL-VALUE    X          X    X     X         X        
-SLOT-VALUE      X*         X    X*    X*        X        
-MEMREF          X                          
-MEMREF-INT      X                          
-struct-slot     X     X*   X    X*    X         X     X* 
-special-var     X     X    X    X     X         X        
-custom                     X    X     X         X     X  
-global (SBCL)                                         X* 
+             Allegro CCL Clasp ECL LispWorks Mezzano SBCL CMUCL
+CAR             X     X    X    X     X         X     X     X  
+CDR             X     X    X    X     X         X     X     X  
+FIRST                      X    X               X     X     X  
+REST                       X    X               X     X     X  
+SVREF           X     X    X    X     X         X           X  
+AREF                                            X     X     X  
+SYMBOL-VALUE    X          X    X     X         X           X  
+SLOT-VALUE      X*         X    X*    X*        X           X  
+MEMREF          X                                              
+MEMREF-INT      X                                              
+struct-slot     X     X*   X    X*    X         X     X*    X  
+special-var     X     X    X    X     X         X           X  
+custom                     X    X     X         X     X     X  
+global (SBCL)                                         X*       
 
 Further restrictions apply:
 
@@ -158,12 +162,14 @@ See CAS
   underflows will wrap around.
 
 # SBCL                                            (SB-EXT:ATOMIC-INCF)
+See CAS
 - struct-slots must be of type SB-EXT:WORD.
 - AREF only works on (SIMPLE-ARRAY SB-EXT:WORD (*)).
 - Other places must be a FIXNUM.
 - The addition is performed with modular arithmetic, meaning over- or
   underflows will wrap around.
 
+# CMUCL
 See CAS")
 
   (function atomic-decf
