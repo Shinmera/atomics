@@ -1,9 +1,3 @@
-#|
- This file is a part of Atomics
- (c) 2019 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
- Author: Nicolas Hafner <shinmera@tymoon.eu>
-|#
-
 (defpackage #:atomics-test
   (:nicknames #:org.shirakumo.atomics.test)
   (:use #:cl #:parachute)

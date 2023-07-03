@@ -1,14 +1,8 @@
-#|
- This file is a part of Atomics
- (c) 2019 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
- Author: Nicolas Hafner <shinmera@tymoon.eu>
-|#
-
 (asdf:defsystem atomics
   :version "1.0.0"
   :license "zlib"
-  :author "Nicolas Hafner <shinmera@tymoon.eu>"
-  :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
+  :author "Yukari Hafner <shinmera@tymoon.eu>"
+  :maintainer "Yukari Hafner <shinmera@tymoon.eu>"
   :description "Portability layer for atomic operations like compare-and-swap (CAS)."
   :homepage "https://shinmera.github.io/atomics/"
   :bug-tracker "https://github.com/Shinmera/atomics/issues"
