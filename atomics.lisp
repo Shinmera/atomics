@@ -14,7 +14,7 @@
    #:defstruct))
 (in-package #:org.shirakumo.atomics)
 
-#+(or allegro ccl clasp ecl lispworks mezzano sbcl cmucl)
+#+(or allegro clasp ecl lispworks mezzano sbcl cmucl)
 (pushnew :atomics-cas-car *features*)
 #+(or allegro ccl clasp ecl lispworks mezzano sbcl cmucl)
 (pushnew :atomics-cas-svref *features*)
