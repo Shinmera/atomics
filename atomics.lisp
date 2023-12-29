@@ -50,9 +50,6 @@ the necessary operators, please file an issue at
 (defun no-support (&optional operation)
   (error 'implementation-not-supported :operation operation))
 
-#-(or allegro ccl clasp ecl lispworks mezzano sbcl (and cmucl x86))
-(no-support)
-
 (defmacro cas (place old new)
   #+allegro
   `(if (excl:atomic-conditional-setf ,place ,new ,old) T NIL)
