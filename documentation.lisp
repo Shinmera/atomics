@@ -35,8 +35,8 @@ SVREF           X     X    X    X     X         X     X     X
 SYMBOL-PLIST    X          X    X                     X     X  
 SYMBOL-VALUE    X          X    X     X         X     X     X  
 SLOT-VALUE      X*         X    X*    X*        X     X*    X  
-MEMREF          X                                              
-MEMREF-INT      X                                              
+MEMREF          X                                     X*        
+MEMREF-INT      X                                     X*        
 struct-slot     X     X*   X    X*    X         X     X*    X  
 special-var     X     X    X    X     X         X     X     X  
 custom                     X    X     X         X     X     X  
@@ -101,6 +101,7 @@ Further restrictions apply:
   SLOT-VALUE-USING-CLASS or SLOT-BOUNDP-USING-CLASS, the consequences
   are undefined.
 - struct-slot types must be either FIXNUM or T.
+- CAS on SB-SYS:SAP-REF-* only since version 2.5.1
 
 # CMUCL                               (based on MP:WITHOUT-SCHEDULING)
 - On CMUCL green threads are implemented on X86 ports only
