@@ -43,7 +43,7 @@ This is most likely due to lack of support by the implementation.
 If you think this is in error, and the implementation does expose
 the necessary operators, please file an issue at
 
-  https://github.com/shinmera/atomics/issues"
+  https://shinmera.com/project/atomics/issues"
                                  (operation c)
                                  (lisp-implementation-type)))))
 
